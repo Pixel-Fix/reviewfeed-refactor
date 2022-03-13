@@ -1,0 +1,23 @@
+/*============================================================================================*/
+/* Your custom styles below */
+/*============================================================================================*/
+
+.review_content,
+.review_listing,
+.box_general,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6  {
+    /* overflow: hidden; */
+    text-overflow: ellipsis;
+    word-wrap: break-word;
+    /* word-break: break-all; */
+
+}
+
+.review_content {
+    padding-right: 5px;
+}
