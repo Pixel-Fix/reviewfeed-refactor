@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreReviewRequest;
 use Illuminate\Http\Request;
 use App\Models\Company;
 use App\Models\Review;
@@ -61,97 +62,42 @@ class ReviewController extends Controller
         ]);
     }
 
-    public function createReview(Request $request, $company_slug)
+    public function store(StoreReviewRequest $request, Company $company)
     {
-        // $request->location = strip_tags($request->input('location'));
-        // $request->title = strip_tags($request->input('title'));
-        // $request->description = strip_tags($request->input('description'));
+        $validated = $request->validated();
 
-        $this->validate($request,[
-            'rating' => 'required | numeric',
-            'category' => 'required | numeric',
-            'location' => 'required | string | max:255',
-            'title' => 'required | string | min:10 | max:255',
-            'description' => 'required | string | min:50',
-            'terms' => 'required | string',
+        $company->reviews()->create([
+            'user_id' => auth()->id,
+            'category_id' => $validated['category_id'],
+            'location' => $validated['location'],
+            'title' => $validated['title'],
+            'description' => $validated['description'],
+            'rating' => $validated['rating'],
         ]);
-
-        $company = Company::where('slug',$company_slug)->firstOrFail();
-
-        $review = new Review;
-        $review->user_id = Auth::id();
-        $review->company_id = $company->id;
-        $review->company_name = $company->name;
-        $review->category_id = $request->input('category');
-        $review->location = $request->input('location');
-        $review->title = $request->input('title');
-        $review->description = $request->input('description');
-        $review->rating_id = $request->input('rating');
-        $review->save();
-
-        $review->slug = $review->id."-".Str::slug($request->input('title'));
-        $review->save();
-
-        $reviews = $company->reviews()->orderBy('created_at','desc')->take(2)->get();
 
         return redirect(route('companies.reviews',$company->slug));
     }
 
-    public function showReviewList(Request $request)
+    public function index(Request $request)
     {
         $search_criteria = $request->input('search_criteria');
-        // $filters_listing = $request->input('filters_listing');
         $filters_category = $request->input('filters_category');
-        ($request->input('filters_rating') !== null) ? ($filters_rating = $request->input('filters_rating')) : ($filters_rating = 0);
-        // var_dump($search_criteria );
-        // var_dump($filters_listing);
-        // var_dump($filters_category);
-        // exit;
+        $filters_rating = $request->input('filters_rating') !== null ? $request->input('filters_rating') : 0;
 
-        if(($search_criteria === null) && ($filters_category === null) && ($filters_rating == 0))
-        {
-            $reviews = Review::orderBy('created_at','desc')
-                        ->paginate(10);
+        $reviews = Review::search($search_criteria)
+            ->category($filters_category)
+            ->rating($filters_rating)
+            ->orderBy('created_at','desc')
+            ->paginate(10);
 
-        }
-        else
-        {
-            if(($filters_category == 'all') || ($filters_category === null))
-            {
-                $reviews = Review::orWhere(function($query) use ($search_criteria) {
-                            $query->where('title','like','%'.str_replace(" ","%",$search_criteria).'%')
-                                  ->orWhere('company_name','like','%'.str_replace(" ","%",$search_criteria).'%');
-                        })
-                        ->where('rating_id','>=',$filters_rating)
-                        ->orderBy('created_at','desc')
-                        ->paginate(10);
-            }
-            else
-            {
-                $reviews = Review::orWhere(function($query) use ($search_criteria) {
-                            $query->where('title','like','%'.str_replace(" ","%",$search_criteria).'%')
-                                ->orWhere('company_name','like','%'.str_replace(" ","%",$search_criteria).'%');
-                        })
-                        ->where('category_id',$filters_category)
-                        ->where('rating_id','>=',$filters_rating)
-                        ->orderBy('created_at','desc')
-                        ->paginate(10);
-            }
-        }
-
-        $ratings = Rating::orderBy('id','asc')->get();
-
-        $categories = Category::orderBy('name','asc')
-                            ->get();
         return view('reviews.review-list',[
             'reviews' => $reviews,
             'search_criteria' => $search_criteria,
             'page_title' => 'Search Results for '.$search_criteria,
-            'categories' => $categories,
-            // 'filters_listing' => $filters_listing,
+            'categories' => Category::orderBy('name','asc')->get(),
             'filters_category' => $filters_category,
             'filters_rating' => $filters_rating,
-            'ratings' => $ratings,
+            'ratings' => Rating::orderBy('id','asc')->get(),
         ]);
     }
 

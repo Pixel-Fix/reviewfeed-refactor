@@ -43,4 +43,27 @@ class Review extends Model
     {
         return $this->belongsTo('App\Models\Category');
     }
+
+    public function scopeCategory($query, $filters_category)
+    {
+        if ($filters_category !== 'all' && $filters_category !== null) {
+            $query->where('category_id',$filters_category);
+        }
+    }
+
+    public function scopeRating($query, $filters_rating)
+    {
+        if ($filters_rating > 0) {
+            $query->where('rating_id','>=',$filters_rating);
+        }
+    }
+
+    public function scopeSearch($query, $search_criteria)
+    {
+        if ($search_criteria) {
+            $query
+                ->where('title','like','%'.str_replace(" ","%",$search_criteria).'%')
+                ->orWhere('company_name','like','%'.str_replace(" ","%",$search_criteria).'%');
+        };
+    }
 }

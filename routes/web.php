@@ -21,53 +21,22 @@ Route::get('/blocked', [App\Http\Controllers\ProfileController::class, 'showBloc
 
 Route::get('/categories/{category_slug}', [App\Http\Controllers\ReviewController::class, 'showReviewsByCategory'])->name('reviews.categories');
 
-Route::get('/companies',[App\Http\Controllers\CompanyController::class,'showCompanyLanding'])->name('companies.landing');
-Route::get('/companies/search',[App\Http\Controllers\ReviewController::class,'searchCompany']);
-Route::post('/companies/search',[App\Http\Controllers\ReviewController::class,'searchCompany'])->name('companies.search');
-Route::get('/companies/steps-to-verify',[App\Http\Controllers\CompanyController::class,'showStepsToVerify'])->name('companies.stepstoverify');
-Route::get('/companies/{company_slug}/reviews',[App\Http\Controllers\CompanyController::class,'showCompanyReviewsList'])->name('companies.reviews');
-
 Route::get('/login/{provider}', [App\Http\Controllers\SocialLoginController::class,'redirectToProvider'])->name('login.provider');
 Route::get('/login/{provider}/callback', [App\Http\Controllers\SocialLoginController::class, 'handleProviderCallback']);
 
 Route::get('/disclaimer', [App\Http\Controllers\HomeController::class, 'showDisclaimer'])->name('disclaimer');
 Route::get('/privacy', [App\Http\Controllers\HomeController::class, 'showPrivacy'])->name('privacy');
 
-Route::get('/reviews',[App\Http\Controllers\ReviewController::class,'showReviewList'])->name('reviews.list');
-Route::post('/reviews',[App\Http\Controllers\ReviewController::class,'showReviewList']);
-Route::get('/reviews/{review_slug}/view',[App\Http\Controllers\ReviewController::class,'showReviewDetail'])->name('reviews.detail');
-
 Route::post('/newsletter/subscribe', [App\Http\Controllers\HomeController::class, 'subscribe'])->name('newsletter.subscribe');
 Route::get('/newsletter/verify/{code}', [App\Http\Controllers\HomeController::class, 'verifyNewsletterSignup'])->name('newsletter.verify');
 
 Route::middleware(['auth','verified','IsActive'])->group(function(){
-
-    Route::get('/ajax/companies/name',[App\Http\Controllers\CompanyController::class,'searchCompanyName']);
-
-    Route::get('/companies/create',[App\Http\Controllers\CompanyController::class,'showCompanyCreateForm'])->name('companies.create');
-    Route::post('/companies/create',[App\Http\Controllers\CompanyController::class,'createCompany']);
-    Route::get('/companies/list',[App\Http\Controllers\CompanyController::class,'showCompanyList'])->name('companies.list');
-    Route::get('/companies/{company_slug}/update',[App\Http\Controllers\CompanyController::class,'showCompanyUpdateForm'])->name('companies.update');
-    Route::post('/companies/{company_slug}/update',[App\Http\Controllers\CompanyController::class,'updateCompany']);
-    Route::get('/companies/{company_slug}/verify',[App\Http\Controllers\CompanyController::class,'verifyCompanySendCode'])->name('companies.verify.sendcode');
-    Route::get('/companies/{company_slug}/verify/{code}',[App\Http\Controllers\CompanyController::class,'verifyCompanyEmail'])->name('companies.verify');
-    // Route::get('/companies/{company_slug}/verify/sendcode',[App\Http\Controllers\CompanyController::class,'verifyCompanySendCode'])->name('companies.verify.sendcode');
-    // Route::post('/companies/update',[App\Http\Controllers\CompanyController::class,'updateCompany']);
-    Route::post('/companies/{company_slug}/logo/update',[App\Http\Controllers\CompanyController::class,'updateCompanyLogo'])->name('companies.logo.update');
-
     Route::get('/profile/update',[App\Http\Controllers\ProfileController::class,'showProfileUpdateForm'])->name('profile.update');
     Route::post('/profile/update',[App\Http\Controllers\ProfileController::class,'updateProfile']);
     Route::get('/profile/password',[App\Http\Controllers\ProfileController::class,'showPasswordUpdateForm'])->name('profile.password');
     Route::post('/profile/password',[App\Http\Controllers\ProfileController::class,'updatePassword']);
     Route::get('/profile/reviews',[App\Http\Controllers\ProfileController::class,'showMyReviews'])->name('profile.reviews');
     Route::get('/profile/company/reviews',[App\Http\Controllers\ProfileController::class,'showMyCompanyReviews'])->name('profile.company.reviews');
-
-    Route::get('/reviews/create',[App\Http\Controllers\ReviewController::class,'showCreateForm'])->name('reviews.create.step1');
-    Route::post('/reviews/create',[App\Http\Controllers\ReviewController::class,'searchCompanyForReview']);
-    Route::get('/reviews/{company_slug}/create',[App\Http\Controllers\ReviewController::class,'showReviewCreateForm'])->name('reviews.create.step2');
-    Route::post('/reviews/{company_slug}/create',[App\Http\Controllers\ReviewController::class,'createReview']);
-    Route::post('/reviews/{review_slug}/reply',[App\Http\Controllers\ReviewController::class,'replyReview'])->name('reviews.reply');
-
 });
 
 Route::middleware(['auth','verified','IsActive','IsAdmin'])->group(function(){
